@@ -1,11 +1,13 @@
+import uvicorn
 from fastapi import FastAPI, Depends, HTTPException
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
-from .database import SessionLocal, engine, init_db
-from . import crud
+from database import SessionLocal, init_db
+import crud
 from pydantic import BaseModel
 from datetime import date, time, datetime
 from typing import List
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -15,9 +17,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+
 async def get_db():
     async with SessionLocal() as session:
         yield session
+
 
 class EventCreate(BaseModel):
     title: str
@@ -26,6 +30,7 @@ class EventCreate(BaseModel):
     date: date
     time: time
     authorID: int
+
 
 class EventRead(BaseModel):
     id: int
@@ -37,7 +42,8 @@ class EventRead(BaseModel):
     authorID: int
     created_at: datetime
 
-@app.post("/api/events/", response_model=EventCreate)
+
+@app.post("/events/", response_model=EventCreate)
 async def create_event(event: EventCreate, db: AsyncSession = Depends(get_db)):
     return await crud.create_event(
         db=db,
@@ -49,21 +55,28 @@ async def create_event(event: EventCreate, db: AsyncSession = Depends(get_db)):
         authorID=event.authorID
     )
 
-@app.get("/api/events/", response_model=List[EventRead])
+
+@app.get("/events/", response_model=List[EventRead])
 async def get_all_events(db: AsyncSession = Depends(get_db)):
     events = await crud.get_all_events(db)
     return events
 
-@app.get("/api/events/{event_id}", response_model=EventRead)
+
+@app.get("/events/{event_id}", response_model=EventRead)
 async def get_event_by_id(event_id: int, db: AsyncSession = Depends(get_db)):
     event = await crud.get_event(db, event_id)
     if event is None:
         raise HTTPException(status_code=404, detail="Event not found")
     return event
 
-@app.delete("/api/events/{event_id}", response_model=dict)
-async def delete_event_by_id(event_id: int, db: AsyncSession = Depends(get_db)):
+
+@app.delete("/events/{event_id}", response_model=dict)
+async def delete_event_by_id(event_id: int,
+                             db: AsyncSession = Depends(get_db)):
     deleted = await crud.delete_event(db, event_id)
     if deleted == 0:
         raise HTTPException(status_code=404, detail="Event not found")
     return {"message": "Event deleted successfully"}
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
