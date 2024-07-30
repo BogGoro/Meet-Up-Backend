@@ -1,6 +1,6 @@
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
-import models
+from api import models
 
 
 async def get_event(db: AsyncSession, event_id: int):

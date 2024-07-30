@@ -2,8 +2,8 @@ import uvicorn
 from fastapi import FastAPI, Depends, HTTPException
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
-from database import SessionLocal, init_db
-import crud
+from api.database import SessionLocal, init_db
+from api import crud
 from pydantic import BaseModel
 from datetime import date, time, datetime
 from typing import List

@@ -2,7 +2,7 @@ import os
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from databases import Database
-import models
+from api import models
 from dotenv import load_dotenv
 
 load_dotenv()
